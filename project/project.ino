@@ -9,7 +9,7 @@
 //#define FLOW_SENSOR_PIN 3
 
 #define BLYNK_PRINT Serial // Comment this out to disable prints and save space
-byte FLOW_SENSOR_INTERRUPT = 2;
+byte FLOW_SENSOR_INTERRUPT = 1;
 byte FLOW_SENSOR_PIN = 3;
 // You should get Auth Token in the Blynk App.
 // Go to the Project Settings (nut icon).
@@ -58,10 +58,10 @@ void setup() {
 void loop() {
   //Blynk.run();
   // put your main code here, to run repeatedly:
-  //t = GetTemp();
-  //m = GetMoisture();
+  t = GetTemp();
+  m = GetMoisture();
   GetFlow();
-  delay(100);
+  delay(2000);
 }
 
 float GetTemp() {
@@ -84,7 +84,6 @@ float GetMoisture() {
 }
 
 float GetFlow() {
-
   if ((millis() - oldTime) > 1000)   // Only process counters once per second
   {
     // Disable the interrupt while calculating flow rate and sending the value to
@@ -111,7 +110,6 @@ float GetFlow() {
 
     // Add the millilitres passed in this second to the cumulative total
     totalMilliLitres += flowMilliLitres;
-
     unsigned int frac;
 
     if (isDebug) {
@@ -122,7 +120,6 @@ float GetFlow() {
 
       // Determine the fractional part. The 10 multiplier gives us 1 decimal place.
       frac = (flowRate - int(flowRate)) * 10;
-
       Serial.print(frac, DEC) ;      // Print the fractional part of the variable
       Serial.print("L/min");
 
@@ -136,11 +133,22 @@ float GetFlow() {
       Serial.print(totalMilliLitres);
       Serial.println("mL");
     }
-
     // Reset the pulse counter so we can start incrementing again
     pulseCount = 0;
 
     // Enable the interrupt again now that we've finished sending output
-    attachInterrupt(FLOW_SENSOR_INTERRUPT, pulseCount, FALLING);
+    attachInterrupt(FLOW_SENSOR_INTERRUPT, pulseCounter, FALLING);
   }
+
+  return flowRate;
+}
+
+void pulseCounter()
+
+{
+
+  // Increment the pulse counter
+
+  pulseCount++;
+
 }
